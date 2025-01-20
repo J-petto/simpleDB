@@ -8,7 +8,7 @@ public class Sql {
     private final Connection connection;
 
     private final StringBuilder query = new StringBuilder();
-    private final ArrayList<Object> set = new ArrayList<>();
+    private final ArrayList<Object> parameter = new ArrayList<>();
 
 
     public Sql(Connection connection) {
@@ -17,14 +17,14 @@ public class Sql {
 
     public long insert() {
         try (PreparedStatement preparedStatement = connection.prepareStatement(String.valueOf(query), Statement.RETURN_GENERATED_KEYS)) {
-            for (int i = 0; i < set.size(); i++) {
-                preparedStatement.setObject(i + 1, set.get(i));
+            for (int i = 0; i < parameter.size(); i++) {
+                preparedStatement.setObject(i + 1, parameter.get(i));
             }
 
             preparedStatement.executeUpdate();
 
             clearQuery();
-            set.clear();
+            parameter.clear();
 
             try (ResultSet generatedKeys = preparedStatement.getGeneratedKeys()) {
                 if (generatedKeys.next()) {
@@ -48,13 +48,13 @@ public class Sql {
         int result;
 
         try (PreparedStatement preparedStatement = connection.prepareStatement(String.valueOf(query))) {
-            for (int i = 0; i < set.size(); i++) {
-                preparedStatement.setObject(i + 1, set.get(i));
+            for (int i = 0; i < parameter.size(); i++) {
+                preparedStatement.setObject(i + 1, parameter.get(i));
             }
 
             result = preparedStatement.executeUpdate();
             clearQuery();
-            set.clear();
+            parameter.clear();
             return result;
         } catch (SQLException e) {
             e.printStackTrace();
@@ -70,8 +70,8 @@ public class Sql {
         List<Map<String, Object>> result = new ArrayList<>();
 
         try (PreparedStatement preparedStatement = connection.prepareStatement(String.valueOf(query))) {
-            for (int i = 0; i < set.size(); i++) {
-                preparedStatement.setObject(i + 1, set.get(i));
+            for (int i = 0; i < parameter.size(); i++) {
+                preparedStatement.setObject(i + 1, parameter.get(i));
             }
 
             try (ResultSet resultSet = preparedStatement.executeQuery()) {
@@ -92,7 +92,7 @@ public class Sql {
             }
 
             clearQuery();
-            set.clear();
+            parameter.clear();
             return result;
         } catch (SQLException e) {
             e.printStackTrace();
@@ -104,8 +104,8 @@ public class Sql {
         Map<String, Object> result = new HashMap<>();
 
         try (PreparedStatement preparedStatement = connection.prepareStatement(String.valueOf(query))) {
-            for (int i = 0; i < set.size(); i++) {
-                preparedStatement.setObject(i + 1, set.get(i));
+            for (int i = 0; i < parameter.size(); i++) {
+                preparedStatement.setObject(i + 1, parameter.get(i));
             }
 
             try (ResultSet resultSet = preparedStatement.executeQuery()) {
@@ -123,7 +123,7 @@ public class Sql {
             }
 
             clearQuery();
-            set.clear();
+            parameter.clear();
             return result;
         } catch (SQLException e) {
             e.printStackTrace();
@@ -135,8 +135,8 @@ public class Sql {
         LocalDateTime result = null;
 
         try (PreparedStatement preparedStatement = connection.prepareStatement(String.valueOf(query))) {
-            for (int i = 0; i < set.size(); i++) {
-                preparedStatement.setObject(i + 1, set.get(i));
+            for (int i = 0; i < parameter.size(); i++) {
+                preparedStatement.setObject(i + 1, parameter.get(i));
             }
 
             try (ResultSet resultSet = preparedStatement.executeQuery()) {
@@ -149,7 +149,7 @@ public class Sql {
             }
 
             clearQuery();
-            set.clear();
+            parameter.clear();
             return result;
         }catch (SQLException e) {
             e.printStackTrace();
@@ -161,8 +161,8 @@ public class Sql {
         String result = null;
 
         try (PreparedStatement preparedStatement = connection.prepareStatement(String.valueOf(query))) {
-            for (int i = 0; i < set.size(); i++) {
-                preparedStatement.setObject(i + 1, set.get(i));
+            for (int i = 0; i < parameter.size(); i++) {
+                preparedStatement.setObject(i + 1, parameter.get(i));
             }
 
             try (ResultSet resultSet = preparedStatement.executeQuery()) {
@@ -174,7 +174,7 @@ public class Sql {
             }
 
             clearQuery();
-            set.clear();
+            parameter.clear();
             return result;
         }catch (SQLException e) {
             e.printStackTrace();
@@ -186,8 +186,8 @@ public class Sql {
         boolean result = false;
 
         try (PreparedStatement preparedStatement = connection.prepareStatement(String.valueOf(query))) {
-            for (int i = 0; i < set.size(); i++) {
-                preparedStatement.setObject(i + 1, set.get(i));
+            for (int i = 0; i < parameter.size(); i++) {
+                preparedStatement.setObject(i + 1, parameter.get(i));
             }
 
             try (ResultSet resultSet = preparedStatement.executeQuery()) {
@@ -199,7 +199,7 @@ public class Sql {
             }
 
             clearQuery();
-            set.clear();
+            parameter.clear();
             return result;
         }catch (SQLException e) {
             e.printStackTrace();
@@ -211,8 +211,8 @@ public class Sql {
         long result = 0L;
 
         try (PreparedStatement preparedStatement = connection.prepareStatement(String.valueOf(query))) {
-            for (int i = 0; i < set.size(); i++) {
-                preparedStatement.setObject(i + 1, set.get(i));
+            for (int i = 0; i < parameter.size(); i++) {
+                preparedStatement.setObject(i + 1, parameter.get(i));
             }
 
             try (ResultSet resultSet = preparedStatement.executeQuery()) {
@@ -223,8 +223,10 @@ public class Sql {
                 }
             }
 
+            System.out.println("변경점");
+
             clearQuery();
-            set.clear();
+            parameter.clear();
             return result;
         }catch (SQLException e) {
             e.printStackTrace();
@@ -232,19 +234,38 @@ public class Sql {
         }
     }
 
-    public Sql append(String query) {
-        checkSpace(query);
+    public Sql append(String arg) {
+        checkSpace(arg);
         return this;
     }
 
-    public Sql append(String query, Object... sets) {
-        checkSpace(query);
-        this.set.addAll(Arrays.asList(sets));
+    public Sql append(String arg, Object... sets) {
+        checkSpace(arg);
+        this.parameter.addAll(Arrays.asList(sets));
         return this;
     }
 
-    public Sql appendIn(String arg, Object... args) {
+    public Sql appendIn(String arg, Object... inParams) {
+        checkSpace(arg);
+        if (query == null || query.isEmpty()) {
+            throw new IllegalArgumentException("Query는 null이거나 빈 값일 수 없습니다.");
+        }
+        if (inParams == null || inParams.length == 0) {
+            throw new IllegalArgumentException("IN 조건에는 하나 이상의 값이 필요합니다.");
+        }
+
+        // ?를 getPlaceholders로 대체
+        String placeholder = getPlaceholders(inParams.length);
+        String replacedQuery = query.toString().replaceFirst("\\?", placeholder);
+
+        query.append(replacedQuery).append(" ");
+        parameter.addAll(Arrays.asList(inParams));
         return this;
+    }
+
+    // 플레이스홀더 생성 (?, ?, ?)
+    private String getPlaceholders(int count) {
+        return String.join(", ", Collections.nCopies(count, "?"));
     }
 
     public Sql appendIn(String... args) {

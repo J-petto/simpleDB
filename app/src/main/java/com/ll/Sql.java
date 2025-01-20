@@ -223,6 +223,8 @@ public class Sql {
                 }
             }
 
+            System.out.println("변경점");
+
             clearQuery();
             parameter.clear();
             return result;
